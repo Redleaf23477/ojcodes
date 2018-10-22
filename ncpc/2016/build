@@ -1,0 +1,18 @@
+#!/bin/bash
+
+src="$1.cpp"
+input="P$1.in"
+output="P$1.out"
+
+
+echo "Compiling"
+g++-8 -std=c++11 -Wall -Wextra -O2 $src
+
+echo "Running"
+time ./a.out <$input >my.out
+echo ""
+
+echo "Testing"
+diff my.out $output
+
+echo "Done"
