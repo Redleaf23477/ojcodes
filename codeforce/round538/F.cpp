@@ -1,54 +1,36 @@
-// stuck on MLE
+//
 #include <bits/stdc++.h>
 
 #define endl '\n'
 #define int ll
 using namespace std;
 typedef long long ll;
+typedef pair<ll, ll> P;
+#define pk first
+#define mask second
 
-const int primeNum = 62;
+const int N = 400005, M = 303;
 const ll MOD = 1e9+7;
-ll primes[] = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271, 277, 281, 283, 293};
-
-vector<ll> factorize(ll x)
-{
-    vector<ll> res(primeNum, 0);
-    for(int i = 0; i < primeNum; i++)
-    {
-        while(x%primes[i] == 0) res[i]++, x/=primes[i];
-    }
-    return res;
-}
-
-ll fpw(ll a, ll p)
-{
-    if(p == 0) return 1;
-    if(p%2 == 0) return fpw(a*a%MOD, p/2);
-    else return fpw(a*a%MOD, p/2)*a%MOD;
-}
-
-/////////////////////
 
 struct Node
 {
-    vector<ll> fac, tag;
-    Node()
-    {
-        fac.resize(primeNum, 0);
-        tag.resize(primeNum, 0);
-    }
+    P tag, val;
+    ll tagExtPk;
+    ll segLen;
 };
 
-void vec_add(vector<ll> &res, vector<ll> &lhs, vector<ll> &rhs)
+// up for segment tree
+P operator + (const P &lhs, const P &rhs)
 {
-    for(int i = 0; i < primeNum; i++) res[i] = lhs[i]+rhs[i];
+    return make_pair(lhs.pk*rhs.pk%MOD, lhs.mask|rhs.mask);
 }
 
-/////////////////////
-
-const int N = 400005;
-int n, q, arr[N];
+vector<int> primes, inv;
+P preTable[M];
 Node st[4*N];
+
+int n, q;
+int arr[N];
 
 void init();
 void process();
@@ -62,130 +44,150 @@ int32_t main()
     return 0;
 }
 
-void up(int idx, int lson, int rson)
+P factorize(ll x)
 {
-    vec_add(st[idx].fac, st[lson].fac, st[rson].fac);
-}
-
-void down(int l, int r, int idx, int lson, int rson)
-{
-    vec_add(st[lson].tag, st[idx].tag, st[lson].tag);
-    vec_add(st[rson].tag, st[idx].tag, st[rson].tag);
-    int segLen = r-l+1;
-    for(int i = 0; i < primeNum; i++) 
+    ll mask = 0, pk = x;
+    for(size_t i = 0; i < primes.size(); i++)
     {
-        st[idx].fac[i] += segLen * st[idx].tag[i];
-        st[idx].tag[i] = 0;
+        while(x % primes[i] == 0) mask |= (1ll<<i), x /= primes[i];
     }
+    return make_pair(pk, mask);
 }
 
-void build_st(int l, int r, int idx)
+ll fastPw(ll a, ll p)
 {
+    if(p == 0) return 1;
+    if(p%2 == 0) return fastPw(a*a%MOD, p/2);
+    else return a*fastPw(a*a%MOD, p/2)%MOD;
+}
+
+ll modInv(ll x)
+{
+    return fastPw(x, MOD-2);
+}
+
+void buildst(int l, int r, int idx)
+{
+    st[idx].segLen = r-l+1;
+    st[idx].tagExtPk = 1;
+    st[idx].tag = make_pair(1, 0);
     if(l == r)
     {
-        st[idx].fac = factorize(arr[l]);
+        st[idx].val = preTable[arr[l]];
         return;
     }
     int mid = (l+r)/2, lson = idx*2, rson = idx*2+1;
-    build_st(l, mid, lson);
-    build_st(mid+1, r, rson);
-    up(idx, lson, rson);
+    buildst(l, mid, lson);
+    buildst(mid+1, r, rson);
+    st[idx].val = st[lson].val + st[rson].val;
 }
 
-void modify(int l, int r, int idx, int L, int R, vector<ll> &fac)
+void down(int idx, int lson, int rson)
+{
+    st[idx].val.pk = st[idx].val.pk * st[idx].tagExtPk % MOD;
+    st[idx].val.mask |= st[idx].tag.mask;
+
+    st[lson].tag = st[idx].tag + st[lson].tag;
+    st[lson].tagExtPk = fastPw(st[lson].tag.pk, st[lson].segLen);
+    st[rson].tag = st[idx].tag + st[rson].tag;
+    st[rson].tagExtPk = fastPw(st[rson].tag.pk, st[rson].segLen);
+
+    st[idx].tagExtPk = 1;
+    st[idx].tag = make_pair(1, 0);
+}
+
+void up(int idx, int lson, int rson)
+{
+    ll lmask = st[lson].tag.mask | st[lson].val.mask;
+    ll rmask = st[rson].tag.mask | st[rson].val.mask;
+    ll lpk = st[lson].val.pk * st[lson].tagExtPk % MOD;
+    ll rpk = st[rson].val.pk * st[rson].tagExtPk % MOD;
+    
+    st[idx].val.mask = lmask | rmask;
+    st[idx].val.pk = lpk * rpk % MOD;
+}
+
+void modify(int l, int r, int idx, int L, int R, int val)
 {
     if(r < L || R < l) return;
     if(L <= l && r <= R)
     {
-        vec_add(st[idx].tag, st[idx].tag, fac);
+        st[idx].tag = st[idx].tag + preTable[val];
+        st[idx].tagExtPk = fastPw(st[idx].tag.pk, st[idx].segLen);
         return;
     }
     int mid = (l+r)/2, lson = idx*2, rson = idx*2+1;
-    down(l, r, idx, lson, rson);
-    modify(l, mid, lson, L, R, fac);
-    modify(mid+1, r, rson, L, R, fac);
+    down(idx, lson, rson);
+    modify(l, mid, lson, L, R, val);
+    modify(mid+1, r, rson, L, R, val);
     up(idx, lson, rson);
 }
 
-vector<ll> query(int l, int r, int idx, int L, int R)
+P query(int l, int r, int idx, int L, int R)
 {
-    vector<ll> res(primeNum, 0);
-    if(r < L || R < l) return res;
-    down(l, r, idx, L, R);
+    if(r < L || R < l) return P(1, 0);
     if(L <= l && r <= R)
     {
-        return st[idx].fac;
+        ll pk = st[idx].val.pk * st[idx].tagExtPk % MOD;
+        ll mask = st[idx].val.mask | st[idx].tag.mask;
+        return make_pair(pk, mask);
     }
     int mid = (l+r)/2, lson = idx*2, rson = idx*2+1;
-    vector<ll> lqry = query(l, mid, lson, L, R);
-    vector<ll> rqry = query(mid+1, r, rson, L, R);
-    vec_add(res, lqry, rqry);
-    return res;
-}
-
-ll calc(vector<ll> fac)
-{
-    /*
-    for(int i = 0; i < primeNum; i++) cout << fac[i] << " ";
-    cout << endl;
-    return 7122;
-    */
-    ll res = 1;
-    for(int i = 0; i < primeNum; i++)
-    {
-        if(fac[i] == 0) continue;
-        res = res * (primes[i]-1) * fpw(primes[i], fac[i]-1) % MOD;
-    }
-    return res;
+    down(idx, lson, rson);
+    P left = query(l, mid, lson, L, R);
+    P right = query(mid+1, r, rson, L, R);
+    return left + right;
 }
 
 void init()
 {
+    // build prime table
+    for(int i = 2; i <= 300; i++)
+    {
+        bool isPrime = true;
+        for(int j = 2; j < i && isPrime; j++)
+        {
+            if(i%j == 0) isPrime = false;
+        }
+        if(isPrime) primes.push_back(i), inv.push_back(modInv(i));
+    }
+
+    // pre-calculate pk and mask for each number between 1~300
+    for(int x = 1; x <= 300; x++)
+    {
+        preTable[x] = factorize(x);
+    }
+
+    // input and build st
     cin >> n >> q;
     for(int i = 0; i < n; i++) cin >> arr[i];
-    build_st(0, n-1, 1);
+    buildst(0, n-1, 1);
 }
-
 
 void process()
 {
     string cmd;
+    int l, r, v;
     while(q--)
     {
-        cin >> cmd;
+        cin >> cmd >> l >> r; l--, r--;
         if(cmd[0] == 'M')
         {
-            int l, r, x; cin >> l >> r >> x;
-            l--, r--;
-            vector<ll> facx = factorize(x);
-            modify(0, n-1, 1, l, r, facx);
+            cin >> v;
+            modify(0, n-1, 1, l, r, v);
         }
         else
         {
-            int l, r; cin >> l >> r;
-            l--, r--;
-            cout << calc(query(0, n-1, 1, l, r)) << endl;
+            P res = query(0, n-1, 1, l, r);
+            ll ans = res.pk;
+            for(int i = 0; i < 64; i++)
+            {
+//                if((res.mask>>i)&1) ans = ans * ((1-modInv(primes[i])+MOD)%MOD) % MOD;
+                if((res.mask>>i)&1) ans = ans * (primes[i]-1) % MOD * inv[i] % MOD;
+            }
+
+            cout << ans << endl;
         }
     }
 }
 
-
-/*
-void pre()
-{
-    // get prime leq 300
-    vector<bool> isPrime(301, true);
-    for(int i = 2; i <= 300; i++)
-    {
-        if(isPrime[i])
-        {
-            primes.push_back(i);
-            for(int j = i*i; j <= 300; j+=i) isPrime[j] = false;
-        }
-    }
-    primeNum = primes.size();
-    cout << primeNum << endl;
-    for(auto p:primes) cout << p << ", ";
-    cout << endl;
-}
-*/
