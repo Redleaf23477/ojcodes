@@ -1,6 +1,8 @@
+#include <cstdio>
+#include <stack>
+#include <vector>
+#include <algorithm>
 
-#include <bits/stdc++.h>
-#define endl '\n'
 using namespace std;
 
 /*
@@ -11,26 +13,27 @@ class UndirectedTarjan
 private:
     int vn;
     int ts; // dfs timestamp
-    vector<vector<int>> graph;  // index of v = 0 ~ vn-1
+    vector< vector<int> > graph;  // index of v = 0 ~ vn-1
     vector<int> low;
     vector<int> dep;  // depth of node, implemented with timestamp
     stack<int> biccStk;  // stack, used to find BiCC
     stack<int> bccStk;  // stack, used to find BCC
     vector<int> AP;
-    vector<vector<int>> BiCC;
-    vector<pair<int,int>> Bridge;
-    vector<vector<int>> BCC;
-    void reportAP(int ap) { AP.emplace_back(ap); }
+    //vector<int> BiCC;
+    vector< vector<int> > BiCC;
+    vector< pair<int,int> > Bridge;
+    vector< vector<int> > BCC;
+    void reportAP(int ap) { AP.push_back(ap); }
     void reportBiCC(int v)
     {
         vector<int> block(1, v);
         while(biccStk.top() != v) 
         {
-            block.emplace_back(biccStk.top()); biccStk.pop();
+            block.push_back(biccStk.top()); biccStk.pop();
         }
-        BiCC.emplace_back(block);
+        BiCC.push_back(block);
     }
-    void reportBridge(int u, int v) { Bridge.emplace_back(u, v); }
+    void reportBridge(int u, int v) { Bridge.push_back((pair<int,int>){u, v}); }
     void reportBCC(int v)
     {
         vector<int> bcc;
@@ -38,9 +41,8 @@ private:
         do
         {
             x = bccStk.top(); bccStk.pop();
-            bcc.emplace_back(x);
         } while(x != v);
-        BCC.emplace_back(bcc);
+        BCC.push_back(bcc);
     }
     void dfs(int v, int p)
     {
@@ -48,8 +50,9 @@ private:
         bool maybeAP = false;
         low[v] = dep[v] = ++ts;
         biccStk.push(v), bccStk.push(v);
-        for(auto c : graph[v])
+        for(size_t i = 0; i < graph[v].size(); i++)
         {
+            int c = graph[v][i];
             if(c == p) continue;
             if(dep[c] == 0) // not visited
             {
@@ -81,8 +84,8 @@ public:
     }
     void addEdge(int u, int v)
     {
-        graph[u].emplace_back(v);
-        graph[v].emplace_back(u);
+        graph[u].push_back(v);
+        graph[v].push_back(u);
     }
     void run()
     {
@@ -90,25 +93,25 @@ public:
             if(dep[i] == 0) dfs(i, i);
     }
     vector<int> getAP() { return AP; }
-    vector<vector<int>> getBiCC() { return BiCC; }
-    vector<pair<int,int>> getBridge() { return Bridge; }
-    vector<vector<int>> getBCC() { return BCC; }
+    vector< vector<int> > getBiCC() { return BiCC; }
+    vector< pair<int,int> > getBridge() { return Bridge; }
+    vector< vector<int> > getBCC() { return BCC; }
 };
 
-int vn;
+int arg;
 
 void init();
 void process();
 
 int main()
 {
-    ios::sync_with_stdio(false); cin.tie(0);
-    while(cin >> vn && vn)
+    int caseN = 0;
+    while(scanf("%d", &arg) && arg)
     {
+        printf("Network #%d\n", ++caseN);
         init();
         process();
     }
-    cout.flush();
 }
 
 UndirectedTarjan graph;
@@ -116,22 +119,38 @@ UndirectedTarjan graph;
 void init()
 {
     graph = UndirectedTarjan();
-    graph.init(vn);
-    string str;
-    cin >> ws;
-    while(getline(cin, str))
+    graph.init(1000);
+    int u, v;
+    scanf("%d", &v); graph.addEdge(arg-1, v-1);
+    while(scanf("%d", &u) && u)
     {
-        stringstream ss(str);
-        int a, b;
-        ss >> a;
-        if(a == 0) break;
-        while(ss >> b) graph.addEdge(a-1, b-1);
+        scanf("%d", &v);
+        graph.addEdge(u-1, v-1);
     }
 }
 
 void process()
 {
     graph.run();
-    auto AP = graph.getAP();
-    cout << AP.size() << endl;
+    vector<int> cnt(1000, 0);
+    vector< vector<int> > BiCC = graph.getBiCC();
+    vector<int> AP = graph.getAP();
+    if(AP.size() == 0)
+    {
+        printf("  No SPF nodes\n\n");
+        return;
+    }
+    for(size_t i = 0; i < BiCC.size(); i++)
+    {
+        vector<int> &bicc = BiCC[i];
+        for(size_t j = 0; j < bicc.size(); j++) cnt[bicc[j]]++;
+    }
+    sort(AP.begin(), AP.end());
+    for(size_t i = 0; i < AP.size(); i++)
+    {
+        int v = AP[i];
+        printf("  SPF node %d leaves %d subnets\n", v+1, cnt[v]);
+    }
+    printf("\n");
 }
+

@@ -1,6 +1,6 @@
-
 #include <bits/stdc++.h>
 #define endl '\n'
+
 using namespace std;
 
 /*
@@ -95,15 +95,15 @@ public:
     vector<vector<int>> getBCC() { return BCC; }
 };
 
-int vn;
-
 void init();
 void process();
+
+int vn;
 
 int main()
 {
     ios::sync_with_stdio(false); cin.tie(0);
-    while(cin >> vn && vn)
+    while(cin >> vn)
     {
         init();
         process();
@@ -117,21 +117,37 @@ void init()
 {
     graph = UndirectedTarjan();
     graph.init(vn);
-    string str;
-    cin >> ws;
-    while(getline(cin, str))
+    for(int i = 0; i < vn; i++)
     {
-        stringstream ss(str);
-        int a, b;
-        ss >> a;
-        if(a == 0) break;
-        while(ss >> b) graph.addEdge(a-1, b-1);
+        int u, v, en; cin >> u;
+        char c; cin >> c >> en >> c;
+        while(en--)
+        {
+            cin >> v;
+            if(u > v) graph.addEdge(u, v);
+        }
     }
 }
 
 void process()
 {
+    if(vn == 0) 
+    {
+        cout << "0 critical links" << endl << endl; return; 
+    }
+
     graph.run();
-    auto AP = graph.getAP();
-    cout << AP.size() << endl;
+
+    auto Bridge = graph.getBridge();
+    cout << Bridge.size() << " critical links" << endl;
+    for(auto &b : Bridge) 
+    {
+        int &u = b.first, &v = b.second;
+        if(u > v) swap(u, v);
+    }
+    sort(Bridge.begin(), Bridge.end());
+    for(auto &b : Bridge)
+        cout << b.first << " - " << b.second << endl;
+    cout << endl;
 }
+

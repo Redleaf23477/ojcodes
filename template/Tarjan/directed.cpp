@@ -1,5 +1,16 @@
+/*
+ * Tarjan's algo :
+ *
+ * - SCC
+ *
+ * on directed graph only!!!
+ *
+ * Tested : Uva 11504 - Dominos
+ *
+*/
+
 #include <bits/stdc++.h>
-#define endl '\n'
+
 using namespace std;
 
 /*
@@ -63,8 +74,6 @@ public:
             if(dep[v] == 0) dfs(v);
     }
     int getSCCId(int v) { return scc[v]; }
-    int getSCCNum() { return sccIdx; }
-    vector<vector<int>> &getGraph() { return graph; }
 };
 
 void init();
@@ -73,47 +82,29 @@ void process();
 int main()
 {
     ios::sync_with_stdio(false); cin.tie(0);
-    int T; cin >> T;
-    while(T--)
-    {
-        init();
-        process();
-    }
+    init();
+    process();
     cout.flush();
 }
 
-vector<int> indeg;
+int vn;
+DirectedTarjan graph;
 
 void init()
 {
-    int vn, en; cin >> vn >> en;
-    DirectedTarjan graph;
+    int en; cin >> vn >> en;
     graph.init(vn);
     while(en--)
     {
         int u, v; cin >> u >> v;
-        graph.addEdge(u-1, v-1);
-    }
-    graph.run();
-    indeg.resize(graph.getSCCNum());
-    for(auto &i : indeg) i = 0;
-    auto g = graph.getGraph();
-    for(int u = 0; u < vn; u++)
-    {
-        int scc_u = graph.getSCCId(u);
-        for(auto v : g[u])
-        {
-            int scc_v = graph.getSCCId(v);
-            if(scc_u != scc_v)
-                indeg[scc_v]++;
-        }
+        graph.addEdge(u, v);
     }
 }
 
 void process()
 {
-    int ans = 0;
-    for(auto v : indeg) if(v == 0) ans++;
-    cout << ans << endl;
+    graph.run();
+    for(int i = 0; i < vn; i++) 
+        cout << "SCCID of " << i << " = " << graph.getSCCId(i) << endl;
 }
 

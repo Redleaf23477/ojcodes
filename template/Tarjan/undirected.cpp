@@ -1,6 +1,22 @@
+/*
+ * Tarjan's algo :
+ *
+ * - AP(articulation point) aka CP(cut vertex)
+ * - Bridge
+ * - BiCC(biconnected component) aka Block
+ * - BCC(bridge connected component)
+ *
+ * on undirected graph only!!!
+ *
+ * Tested : (not yet)
+ * - AP : UVa 315 Network 
+ * - Bridge : UVa 796 Critical Links 
+ * - BiCC : Poj 1523 SPF
+ * - BCC : Poj 3352 Road Construction
+*/
 
 #include <bits/stdc++.h>
-#define endl '\n'
+
 using namespace std;
 
 /*
@@ -95,19 +111,14 @@ public:
     vector<vector<int>> getBCC() { return BCC; }
 };
 
-int vn;
-
 void init();
 void process();
 
 int main()
 {
     ios::sync_with_stdio(false); cin.tie(0);
-    while(cin >> vn && vn)
-    {
-        init();
-        process();
-    }
+    init();
+    process();
     cout.flush();
 }
 
@@ -115,17 +126,12 @@ UndirectedTarjan graph;
 
 void init()
 {
-    graph = UndirectedTarjan();
+    int vn, en; cin >> vn >> en;
     graph.init(vn);
-    string str;
-    cin >> ws;
-    while(getline(cin, str))
+    while(en--)
     {
-        stringstream ss(str);
-        int a, b;
-        ss >> a;
-        if(a == 0) break;
-        while(ss >> b) graph.addEdge(a-1, b-1);
+        int u, v; cin >> u >> v;
+        graph.addEdge(u, v);
     }
 }
 
@@ -133,5 +139,29 @@ void process()
 {
     graph.run();
     auto AP = graph.getAP();
-    cout << AP.size() << endl;
+    cout << "AP : " << endl;
+    for(auto ap : AP) cout << ap << endl;
+
+    auto Bridge = graph.getBridge();
+    cout << "Bridge : " << endl;
+    for(auto b : Bridge) cout << "(" << b.first << "," << b.second << ")" << endl;
+
+    auto BiCC = graph.getBiCC();
+    cout << "BiCC : " << endl;
+    for(auto &bicc : BiCC) 
+    {
+        cout << "{ ";
+        for(auto v : bicc) cout << v << " ";
+        cout << "}" << endl;
+    }
+
+    auto BCC = graph.getBCC();
+    cout << "BCC : " << endl;
+    for(auto &bcc : BCC)
+    {
+        cout << "{ ";
+        for(auto v : bcc) cout << v << " ";
+        cout << "}" << endl;
+    }
 }
+

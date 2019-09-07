@@ -1,6 +1,8 @@
+#include <cstdio>
+#include <stack>
+#include <vector>
+#include <algorithm>
 
-#include <bits/stdc++.h>
-#define endl '\n'
 using namespace std;
 
 /*
@@ -11,26 +13,27 @@ class UndirectedTarjan
 private:
     int vn;
     int ts; // dfs timestamp
-    vector<vector<int>> graph;  // index of v = 0 ~ vn-1
+    vector< vector<int> > graph;  // index of v = 0 ~ vn-1
     vector<int> low;
     vector<int> dep;  // depth of node, implemented with timestamp
     stack<int> biccStk;  // stack, used to find BiCC
     stack<int> bccStk;  // stack, used to find BCC
     vector<int> AP;
-    vector<vector<int>> BiCC;
-    vector<pair<int,int>> Bridge;
-    vector<vector<int>> BCC;
-    void reportAP(int ap) { AP.emplace_back(ap); }
+    //vector<int> BiCC;
+    vector< vector<int> > BiCC;
+    vector< pair<int,int> > Bridge;
+    vector< vector<int> > BCC;
+    void reportAP(int ap) { AP.push_back(ap); }
     void reportBiCC(int v)
     {
         vector<int> block(1, v);
         while(biccStk.top() != v) 
         {
-            block.emplace_back(biccStk.top()); biccStk.pop();
+            block.push_back(biccStk.top()); biccStk.pop();
         }
-        BiCC.emplace_back(block);
+        BiCC.push_back(block);
     }
-    void reportBridge(int u, int v) { Bridge.emplace_back(u, v); }
+    void reportBridge(int u, int v) { Bridge.push_back((pair<int,int>){u, v}); }
     void reportBCC(int v)
     {
         vector<int> bcc;
@@ -38,9 +41,9 @@ private:
         do
         {
             x = bccStk.top(); bccStk.pop();
-            bcc.emplace_back(x);
+            bcc.push_back(x);
         } while(x != v);
-        BCC.emplace_back(bcc);
+        BCC.push_back(bcc);
     }
     void dfs(int v, int p)
     {
@@ -48,8 +51,9 @@ private:
         bool maybeAP = false;
         low[v] = dep[v] = ++ts;
         biccStk.push(v), bccStk.push(v);
-        for(auto c : graph[v])
+        for(size_t i = 0; i < graph[v].size(); i++)
         {
+            int c = graph[v][i];
             if(c == p) continue;
             if(dep[c] == 0) // not visited
             {
@@ -81,8 +85,8 @@ public:
     }
     void addEdge(int u, int v)
     {
-        graph[u].emplace_back(v);
-        graph[v].emplace_back(u);
+        graph[u].push_back(v);
+        graph[v].push_back(u);
     }
     void run()
     {
@@ -90,48 +94,64 @@ public:
             if(dep[i] == 0) dfs(i, i);
     }
     vector<int> getAP() { return AP; }
-    vector<vector<int>> getBiCC() { return BiCC; }
-    vector<pair<int,int>> getBridge() { return Bridge; }
-    vector<vector<int>> getBCC() { return BCC; }
+    vector< vector<int> > getBiCC() { return BiCC; }
+    vector< pair<int,int> > getBridge() { return Bridge; }
+    vector< vector<int> > getBCC() { return BCC; }
+    vector< vector<int> > &getGraph() { return graph; }
 };
-
-int vn;
 
 void init();
 void process();
 
 int main()
 {
-    ios::sync_with_stdio(false); cin.tie(0);
-    while(cin >> vn && vn)
-    {
-        init();
-        process();
-    }
-    cout.flush();
+    init();
+    process();
 }
 
+int vn, en;
 UndirectedTarjan graph;
 
 void init()
 {
-    graph = UndirectedTarjan();
+    scanf("%d %d", &vn, &en);
     graph.init(vn);
-    string str;
-    cin >> ws;
-    while(getline(cin, str))
+    while(en--)
     {
-        stringstream ss(str);
-        int a, b;
-        ss >> a;
-        if(a == 0) break;
-        while(ss >> b) graph.addEdge(a-1, b-1);
+        int u, v; scanf("%d %d", &u, &v);
+        graph.addEdge(u-1, v-1);
     }
 }
 
 void process()
 {
     graph.run();
-    auto AP = graph.getAP();
-    cout << AP.size() << endl;
+    // give idx to bcc 
+    vector<int> bccIdx(vn, 0);
+    int idx = 1;
+    vector< vector<int> > BCC = graph.getBCC();
+    for(size_t i = 0; i < BCC.size(); i++)
+    {
+        for(size_t j = 0; j < BCC[i].size(); j++)
+        {
+            bccIdx[BCC[i][j]] = idx;
+        }
+        idx++;
+    }
+    // bcc graph
+    vector<int> edgeNum(idx, 0);
+    vector< vector<int> > g = graph.getGraph();
+    for(size_t i = 0; i < g.size(); i++)
+    {
+        for(size_t j = 0; j < g[i].size(); j++)
+            if(bccIdx[i] != bccIdx[g[i][j]]) edgeNum[bccIdx[i]]++;
+    }
+    // cnt leaf
+    int leaves = 0;
+    for(size_t i = 0; i < edgeNum.size(); i++)
+        if(edgeNum[i] == 1) leaves++;
+    printf("%d\n", (leaves+1)/2);
+
+
 }
+
