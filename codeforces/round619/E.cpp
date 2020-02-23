@@ -1,5 +1,5 @@
 // by redleaf23477
-// RMQ using 2d seg tree, TLE
+// RMQ using 2d sparse table
 #include <bits/stdc++.h>
 
 #define endl '\n'
