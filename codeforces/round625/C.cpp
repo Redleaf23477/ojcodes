@@ -120,7 +120,7 @@ void init()
     for(int m = 0; m < mn; m++)
     {
         ll def, atk, coin; cin >> def >> atk >> coin;
-        armor_monster.emplace_back(1, atk, def, coin);
+        armor_monster.emplace_back(1, def, atk, coin);
     }
     sort(armor_monster.begin(), armor_monster.end());
     st.build(0, wn-1, 1, weapon);
@@ -133,7 +133,7 @@ void process()
     cerr << "weapon : " << endl;
     for(auto w : weapon) cerr << w.first << " " << w.second << endl;
     cerr << "armor_monster : " << endl;
-    for(auto w : armor_monster) cerr << w.type << " " << w.def << " " << w.atk << endl;
+    for(auto w : armor_monster) cerr << w.type << " " << w.def << " " << w.atk << " " << w.coin << endl;
     */
     for(size_t i = 0; i < armor_monster.size(); i++)
     {
