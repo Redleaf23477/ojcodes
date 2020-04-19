@@ -61,15 +61,15 @@ void init()
 void getHit()
 {
     ll len = 2*1e9 / 4;
-    for(int i = 0; i < 3; i++)
+    for(int i = 1; i <= 3; i++)
     {
-        for(int j = 0; j < 3; j++)
+        for(int j = 1; j <= 3; j++)
         {
             bool res = test(-1e9 + i*len, -1e9 + j*len);
             if(center == 1) return;
             if(res == true)
             {
-                hit = P(i*len, j*len);
+                hit = P(-1e9 + i*len, -1e9 + j*len);
                 return;
             }
         }
