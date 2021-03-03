@@ -32,8 +32,13 @@ void init() {
 }
 
 void process() {
-    int n, k; cin >> n >> k;
-    for (int i = 0; i < n; i++) cout << (char)('a'+i%3);
-    cout << endl;
+    int n; cin >> n;
+    int ans = 0, cnt = 0, prv = -1;
+    for (int i = 0; i < n; i++) {
+        int x; cin >> x;
+        if (prv != x) ans = max(cnt, ans), cnt = 0, prv = x;
+        cnt++;
+    }
+    cout << max(ans, cnt) << endl;
 }
 

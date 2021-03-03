@@ -2,7 +2,7 @@
 #include <bits/stdc++.h>
 
 // iostream macros
-//#define endl '\n'
+#define endl '\n'
 #define var(x) "[" << #x << "=" << x << "]"
 // chrono macros
 #define chrono_now std::chrono::high_resolution_clock::now()
@@ -28,39 +28,23 @@ int main() {
     return 0;
 }
 
-int R, C;
-vector<vector<char>> arr;
-vector<vector<int>> len;
-
 void init() {
-    cin >> R >> C;
-    arr.assign(R, vector<char>(C));
-    len.assign(R, vector<int>(C, 0));
-    for (int i = 0; i < R; i++) for (int j = 0; j < C; j++)
-        cin >> arr[i][j];
-    for (int i = 0; i < R; i++) for (int j = 0; j < C; j++) {
-        for (int l = 1; j-l+1 >= 0 && j+l-1 < C; l++) {
-            if (arr[i][j-l+1] == '*' && arr[i][j+l-1] == '*') len[i][j] = l;
-            else break;
-        }
-    }
-    /*
-    for (int r = 0; r < R; r++) {
-        for (int c = 0; c < C; c++)
-            cerr << len[r][c] << " ";
-        cerr << endl;
-    }
-    */
 }
 
 void process() {
-    LL ans = 0;
-    for (int r = 0; r < R; r++) for (int c = 0; c < C; c++) {
-        for (int d = 1; r+d-1 < R; d++) {
-            if (len[r+d-1][c] >= d) ans++;
-            else break;
+    LL n, d; cin >> n >> d;
+    while (n--) {
+        LL x; cin >> x;
+        bool good = false;
+        if (x >= 10*d) good = true;
+        else {
+            for (int i = 1; i <= 10; i++) {
+                if (x >= i*d && (x - i*d)%10 == 0) {
+                    good = true;
+                }
+            }
         }
+        cout << (good? "YES" : "NO") << endl;
     }
-    cout << ans << endl;
 }
 
