@@ -45,21 +45,25 @@ Mat fastpw(Mat m, LL p) {
 int main() {
     ios::sync_with_stdio(false); cin.tie(0);
     LL H, W, K; cin >> H >> W >> K;
-    LL r1, c1, r2, c2; cin >> c1 >> r1 >> c2 >> r2;
+    LL r1, c1, r2, c2; cin >> r1 >> c1 >> r2 >> c2;
     Mat A(9, 9); {
         vector<LL> c_len {max(0ll, c1-1), 1, max(0ll, W-c1)};
         vector<LL> r_len {max(0ll, r1-1), 1, max(0ll, H-r1)};
         for (int i = 0; i < 3; i++) for (int j = 0; j < 3; j++) {
             for (int u = 0; u < 3; u++) for (int v = 0; v < 3; v++) {
-                A[u*3+v][i*3+j] = (i==u) * (c_len[j]) + (j==v) * (r_len[i]) - (i==u) * (j==v) * (c_len[j] + r_len[i]);
+                if (r_len[i] > 0 && c_len[j] > 0 && r_len[u] > 0 && c_len[v] > 0) {
+                    A[u*3+v][i*3+j] = ((i==u) * c_len[j] + (j==v) * r_len[i] - (i==u) * (j==v) * 2 + MOD) % MOD;
+                }
             }
         }
+        /*
         for (int i = 0; i < 9; i++) {
             for (int j = 0; j < 9; j++) {
                 cerr << A[i][j] << " ";
             }
             cerr << endl;
         }
+        */
     }
     Mat x(9, 1); {
         x[4][0] = 1;  // other is 0
@@ -67,6 +71,7 @@ int main() {
     Mat Ak = fastpw(A, K);
     Mat B = Ak * x;
 
+    /*
     cerr << "-----" << endl;
     for (size_t i = 0; i < Ak.row_num(); i++) {
         for (size_t j = 0; j < Ak.col_num(); j++) {
@@ -81,6 +86,7 @@ int main() {
         }
         cerr << endl;
     }
+    */
 
     auto f = [](int x1, int x2) {
         if (x2 < x1) return 0;
@@ -88,6 +94,5 @@ int main() {
         else return 2;
     };
     int idx = 3 * f(r1, r2) + f(c1, c2);
-    cerr << "idx = " << idx << endl;
     cout << B[idx][0] << endl;
 }
