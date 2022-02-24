@@ -20,14 +20,14 @@ int main() {
     int T; cin >> T;
     vector<bool> is_prime = build_prime(1000001);
     while (T--) {
-        int n, k; cin >> n >> k;
+        int n, e; cin >> n >> e;
         vector<int> arr(n);
         for (auto &x : arr) cin >> x;
 
         LL ans = 0;
-        for (int i = 0; i < k; i++) {
+        for (int i = 0; i < e; i++) {
             LL consecutive_ones = 0, prev = 1, prev_cnt = 0;
-            for (int j = i; j < n; j += k) {
+            for (int j = i; j < n; j += e) {
                 if (arr[j] == 1) {
                     if (prev != 1 && is_prime[prev]) {
                         ans += prev_cnt + 1;

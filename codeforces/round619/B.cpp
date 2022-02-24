@@ -1,90 +1,53 @@
-// by redleaf23477
 #include <bits/stdc++.h>
-
-#define endl '\n'
-#define var(x) "[" << #x << "=" << x << "]"
-
 using namespace std;
-using ll = long long int;
+using LL = long long int;
 
-const ll INF = 1e9;
+LL good(LL d, const vector<LL> &arr) {
+    LL l = 0, r = 1e9;
+    for (auto x : arr) {
+        l = max(l, x - d);
+        r = min(r, x + d);
+    }
+    if (l <= r) return l;
+    else return -1;
+}
 
-ll n;
-vector<ll> arr;
+void solve() {
+    int n; cin >> n;
+    vector<LL> arr(n), adj_blank;
+    for (auto &x : arr) cin >> x;
+    LL diff = 0;
+    for (int i = 0; i < n; i++) {
+        if (arr[i] == -1) continue;
+        if (i > 0 && arr[i-1] != -1) {
+            diff = max(diff, abs(arr[i] - arr[i-1]));
+        }
+        if ((i > 0 && arr[i-1] == -1) || (i+1 < n && arr[i+1] == -1)) {
+            adj_blank.emplace_back(arr[i]);
+        }
+    }
 
-void init();
-void process();
+    if (adj_blank.empty()) {
+        cout << 0 << " " << 0 << "\n"; return;
+    }
+    LL low = diff, high = 1e9, ans = -1, ans_num = -1;
+    while (low <= high) {
+        LL mid = (low + high) / 2;
+        LL num = good(mid, adj_blank);
+        if (num == -1) {
+            low = mid + 1;
+        } else {
+            ans = mid, ans_num = num, high = mid - 1;
+        }
+    }
+    cout << ans << " " << ans_num << "\n";
+}
 
-int main()
-{
-    ios::sync_with_stdio(false); cin.tie(0);
+int main() {
+    ios::sync_with_stdio(false); cin.tie();
     int T; cin >> T;
-    while(T--)
-    {
-        init();
-        process();
+    while (T--) {
+        solve(); 
     }
-    cout.flush();
-    return 0;
-}
-
-void init()
-{
-    cin >> n;
-    arr.resize(n);
-    for(auto &x : arr) cin >> x;
-}
-
-ll ok(ll delta)
-{
-    ll up = 2*INF, down = -2*INF;
-    for(int i = 0; i < n; i++)
-    {
-        if(arr[i] != -1) continue;
-        if(i > 0 && arr[i-1] != -1)
-        {
-            up = min(up, arr[i-1]+delta);
-            down = max(down, arr[i-1]-delta);
-        }
-        if(i < n-1 && arr[i+1] != -1)
-        {
-            up = min(up, arr[i+1]+delta);
-            down = max(down, arr[i+1]-delta);
-        }
-    }
-    if(down <= up)
-    {
-        if(up <= INF) return up;
-        else if(down >= 0) return down;
-        else return 2*INF;
-    }
-    else
-    {
-        return -1;
-    }
-}
-
-bool allneg1()
-{
-    return *max_element(arr.begin(), arr.end()) == -1;
-}
-
-void process()
-{
-    if(allneg1()) { cout << 0 << " " << 0 << endl; return; }
-    ll low = 0, high = INF, mid, ans = -1, num = -1;
-    while(low <= high)
-    {
-        mid = (low+high)/2;
-        ll res = ok(mid);
-        if(res != -1) ans = mid, num = res, high = mid-1;
-        else low = mid+1;
-    }
-    for(int i = 1; i < n; i++)
-    {
-        if(arr[i] != -1 && arr[i-1] != -1)
-            ans = max(ans, abs(arr[i]-arr[i-1]));
-    }
-    cout << ans << " " << num << endl;
 }
 

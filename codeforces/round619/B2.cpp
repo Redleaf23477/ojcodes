@@ -7,7 +7,9 @@
 using namespace std;
 using ll = long long int;
 
-int n;
+const ll INF = 1e9;
+
+ll n;
 vector<ll> arr;
 
 void init();
@@ -33,43 +35,55 @@ void init()
     for(auto &x : arr) cin >> x;
 }
 
-const ll INF = 1e9+7;
-#define min(x, y) (x > y? y : x)
-#define max(x, y) (x > y? x : y)
-ll ok(ll num)
+ll ok(ll delta)
 {
-    ll mx = INF, mn = -INF;
+    ll up = 2*INF, down = -2*INF;
     for(int i = 0; i < n; i++)
     {
-        if(arr[i] != -1)
+        if(arr[i] != -1) continue;
+        if(i > 0 && arr[i-1] != -1)
         {
-            mx = min(mx, arr[i]+num);
-            mn = max(mn, arr[i]-num);
+            up = min(up, arr[i-1]+delta);
+            down = max(down, arr[i-1]-delta);
+        }
+        if(i < n-1 && arr[i+1] != -1)
+        {
+            up = min(up, arr[i+1]+delta);
+            down = max(down, arr[i+1]-delta);
         }
     }
-    mx = min(1e9, mx);
-    mn = max(0, mn);
-    if(mn > mx) return -1;
-    return mx;
+    if(down <= up)
+    {
+        if(up <= INF) return up;
+        else if(down >= 0) return down;
+        else return 2*INF;
+    }
+    else
+    {
+        return -1;
+    }
+}
+
+bool allneg1()
+{
+    return *max_element(arr.begin(), arr.end()) == -1;
 }
 
 void process()
 {
-    ll low = 0, high = 1e9, mid, ans = -1, num = -1;
-    for(int i = 1; i < n; i++)
-    {
-        if(arr[i] != -1 && arr[i-1] != -1)
-        {
-            low = max(low, abs(arr[i]-arr[i-1]));
-            high = min(high, max(arr[i], 1e9-arr[i]));
-        }
-    }
+    if(allneg1()) { cout << 0 << " " << 0 << endl; return; }
+    ll low = 0, high = INF, mid, ans = -1, num = -1;
     while(low <= high)
     {
         mid = (low+high)/2;
         ll res = ok(mid);
         if(res != -1) ans = mid, num = res, high = mid-1;
         else low = mid+1;
+    }
+    for(int i = 1; i < n; i++)
+    {
+        if(arr[i] != -1 && arr[i-1] != -1)
+            ans = max(ans, abs(arr[i]-arr[i-1]));
     }
     cout << ans << " " << num << endl;
 }
