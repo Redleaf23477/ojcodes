@@ -18,6 +18,6 @@ int main() {
         it = cir.erase(it);
         if (it == cir.end()) it = cir.begin();
     }
-    cout << endl;
+    cout << "\n";
 }
 

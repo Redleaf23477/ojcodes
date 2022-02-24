@@ -66,3 +66,56 @@ int main() {
         cout << "NO\n";
     }
 }
+=======
+ 
+void print_cycle(int u, int n, const vector<int> &pa) {
+    cout << "YES\n";
+    for (int i = 0; i < n; i++) u = pa[u];
+    int v = u;
+    vector<int> ans;
+    do {
+        ans.emplace_back(v);
+        v = pa[v];
+    } while (v != u);
+    ans.emplace_back(u);
+    reverse(ans.begin(), ans.end());
+    for (auto x : ans) cout << x << " ";
+    cout << "\n";
+}
+ 
+int main() {
+    ios::sync_with_stdio(false); cin.tie();
+    int n, m; cin >> n >> m;
+    vector<Edge> edge_list(m);
+    for (auto &[u, v, w] : edge_list) {
+        cin >> u >> v >> w;
+    }
+    // add vertex 0 and special edges
+    for (int i = 1; i <= n; i++) {
+        edge_list.emplace_back(0, i, 0);
+    }
+    n += 1, m = edge_list.size();
+    vector<int> pa(n, -1);
+    vector<LL> dist(n, INF);
+    pa[0] = dist[0] = 0;
+
+    // bellman ford build shortest path tree
+    // and neg cycle check
+    int last_updated_vertex;
+    for (int i = 0; i < n; i++) {
+        last_updated_vertex = -1;
+        for (auto [u, v, w] : edge_list) {
+            if (dist[v] > dist[u] + w) {
+                dist[v] = dist[u] + w;
+                pa[v] = u;
+                last_updated_vertex = v;
+            }
+        }
+    }
+
+    if (last_updated_vertex == -1) {
+        cout << "NO\n";
+    } else {
+        print_cycle(last_updated_vertex, n, pa);
+    }
+}

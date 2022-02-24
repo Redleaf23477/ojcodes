@@ -8,67 +8,61 @@ constexpr int dr[] = {-1, 1, 0, 0}, dc[] = {0, 0, -1, 1};
 int cmd[N];
 int H[N+1], V[N+1], Q[N+1];
 bool vis[M][M], bfs_vis[M][M];
+pair<int,int> q[N];
  
 inline bool legal(int r, int c) {
     return 0 <= r && r < M && 0 <= c && c < M;
 }
- 
-inline bool possible(int n, int nr, int nc) {
+
+inline bool possible(int n, int sr, int sc) {
     memcpy(bfs_vis, vis, sizeof(vis));
-    bfs_vis[nr][nc] = true;
+    bfs_vis[sr][sc] = true;
     int cnt = 0;
-    queue<pair<int,int>> q;
+    int f = 0, b = 0;
     if (bfs_vis[M-1][0] == false) {
-        q.emplace(M-1, 0); bfs_vis[M-1][0] = true;
+        q[b++] = make_pair(M-1, 0); bfs_vis[M-1][0] = true;
     }
-    while (!q.empty()) {
-        auto [r, c] = q.front(); q.pop();
+    while (f < b) {
+        auto [r, c] = q[f++];
         cnt += 1;
+        int deg = 0;
+        bool is_terminal = (make_pair(r, c) == make_pair(sr, sc)) || (make_pair(r, c) == make_pair(M-1, 0));
         for (int d = 0; d < 4; d++) {
             int nr = r + dr[d], nc = c + dc[d];
-            if (legal(nr, nc) && !bfs_vis[nr][nc]) {
-                bfs_vis[nr][nc] = true;
-                q.emplace(nr, nc);
+            if (legal(nr, nc)) {
+                if (!vis[nr][nc]) {
+                    deg += 1;
+                }
+                if (!bfs_vis[nr][nc]) {
+                    bfs_vis[nr][nc] = true;
+                    q[b++] = make_pair(nr, nc);
+                }
             }
+        }
+        if (deg == 1 && !is_terminal) {
+            return false;
         }
     }
     return n + cnt == N; 
 }
  
-// string stk(48, 'x');
- 
 int dfs(int n, int r, int c) {
     if (n == N) {
-//        cerr << stk << endl;
         return 1;
     }
     vis[r][c] = true;
-    vector<pair<int,int>> cand;
+    int ans = 0;
     if (cmd[n] == 4) {
         for (int d = 0; d < 4; d++) {
             int nr = r + dr[d], nc = c + dc[d];
-            if (legal(nr, nc) && vis[nr][nc] == 0) {
-                cand.emplace_back(nr, nc);
+            if (legal(nr, nc) && vis[nr][nc] == 0 && possible(n+1, nr, nc)) {
+                ans += dfs(n+1, nr, nc);
             }
         }
     } else {
         int nr = r + dr[cmd[n]];
         int nc = c + dc[cmd[n]];
-        if (legal(nr, nc) && vis[nr][nc] == 0) {
-            cand.emplace_back(nr, nc);
-        }
-    }
-    int ans = 0;
-    for (auto [nr, nc] : cand) {
-        if (possible(n+1, nr, nc)) {
-//            for (int d = 0; d < 4; d++) {
-//                if (nr == r + dr[d] && nc == c + dc[d]) {
-//                    if (d == 0) stk[n] = 'U';
-//                    else if (d == 1) stk[n] = 'D';
-//                    else if (d == 2) stk[n] = 'L';
-//                    else stk[n] = 'R';
-//                }
-//            }
+        if (legal(nr, nc) && vis[nr][nc] == 0 && possible(n+1, nr,nc)) {
             ans += dfs(n+1, nr, nc);
         }
     }
@@ -89,12 +83,5 @@ int main() {
             default: assert(false); break;
         }
     }
-    /*
-       for (int i = N-1; i >= 0; i--) {
-       Q[i] = Q[i+1] + (cmd[i] == 4);
-       H[i] = H[i+1] + (cmd[i] == 4? 0 : dr[cmd[i]] + dc[cmd[i]]);
-       V[i] = V[i+1] + (cmd[i] == 4? 0 : dr[cmd[i]] + dc[cmd[i]]);
-       }
-       */
     cout << dfs(0, 0, 0) << "\n";
 }
