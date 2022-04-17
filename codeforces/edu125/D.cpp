@@ -21,33 +21,27 @@ int main() {
     });
     vector<LL> mp(C+1, -1);
     for (auto [c, dh] : arr) {
-//        cerr << ">> c = " << c << ", dh = " << dh << endl;
-        for (LL money = c, it = 1; money <= C; money += c, it++) {
-            if (mp[money] != -1) break;
-            mp[money] = dh * it;
-//            cerr << "....add " << money << " -> " << dh * it << endl;
+        mp[c] = max(mp[c], dh);
+    }
+    for (int c = 1; c <= C; c++) {
+        if (mp[c] == -1) continue;
+        for (int d = c + c, it = 2; d <= C; d += c, it++) {
+            mp[d] = max(mp[d], mp[c] * it);
         }
     }
-    vector<T> qry;
-    for (int i = 0; i <= C; i++) {
-        if (mp[i] != -1) {
-            LL dh = mp[i];
-            if (!qry.empty()) {
-                dh = max(dh, get<1>(qry.back()));
-            }
-            qry.emplace_back(i, dh);
-        }
+    for (int c = 1; c <= C; c++) {
+        mp[c] = max(mp[c], mp[c-1]);
     }
     int q; cin >> q;
     while (q--) {
         LL D, H; cin >> D >> H;
         LL DH = D * H;
-        int low = 0, high = qry.size() - 1, mid; LL ans = -1;
+        int low = 0, high = C; LL ans = -1;
         while (low <= high) {
-            mid = (low + high) / 2;
-            auto [c, dh] = qry[mid];
-            if (dh > DH) ans = c, high = mid - 1;
-            else low = mid + 1;
+            LL c = (low + high) / 2;
+            LL dh = mp[c];
+            if (dh > DH) ans = c, high = c - 1;
+            else low = c + 1;
         }
         cout << ans << " ";
     }
