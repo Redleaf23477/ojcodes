@@ -2,6 +2,27 @@
 using namespace std;
 using LL = long long int;
 
+// better solution
+
+int main() {
+    ios::sync_with_stdio(false); cin.tie(0);
+    int n; cin >> n;
+    vector<int> arr(n);
+    for (auto &x : arr) cin >> x;
+
+    stack<int> stk;
+    for (int i = 0; i < n; i++) {
+        while (!stk.empty() && arr[i] <= arr[stk.top()]) stk.pop();
+        if (stk.empty()) cout << 0 << " ";
+        else cout << stk.top() + 1 << " ";
+        stk.emplace(i);
+    }
+    cout << "\n";
+}
+
+/*
+// Slow solution (segment tree)
+
 struct Seg1D {
     int n;
     vector<int> st;
@@ -56,4 +77,5 @@ int main() {
     }
     cout << "\n";
 }
+*/
 
