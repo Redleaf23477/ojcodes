@@ -73,9 +73,7 @@ struct Seg1D {
     }
     T query(int l, int r, int idx, int L, int R) {
         if (L <= l && r <= R) {
-            LL c = sum_with_coef[idx] - sum[idx] * (l - L);
-            LL s = sum[idx];
-            return T(c, s);
+            return T(sum_with_coef[idx], sum[idx]);
         }
         if (r < L || R < l) return T(0, 0);
         int mid = (l + r) / 2, lson = idx * 2, rson = idx * 2 + 1;
@@ -88,8 +86,13 @@ struct Seg1D {
     void set(int L, int R, int val) { set(0, n-1, 1, L, R, val); }
     bool query(int L, int R) { 
         auto [coef, sum] = query(0, n-1, 1, L, R);
+        coef -= L * sum;
         if (sum == 0) return coef == 0;
-        else return coef % sum == 0;
+        else if (coef % sum != 0) return false;
+        else {
+            LL k = coef / sum;
+            return 1 <= k && k <= (R - L + 1);
+        }
     }
 };
 
