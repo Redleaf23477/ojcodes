@@ -1,0 +1,33 @@
+
+
+  
+xxxxx             ^                 +-------+
+xxxxx         +y /                 /  top  /|
+xxBxx           /                 /       / |
+xxxxD  (0,0,0) O-------->        +-------+  | right
+xDxxx          |   +x       left |       |  +
+            +z |                 | front | /
+xxExD          |                 |       |/
+xxxxx          v                 +-------+
+Axxxx               
+xxxxx
+xxxxx         top  
+              ..E.D
+xxxxx         BEC..            back
+BxCxx         A.BB.            .DB.D
+xxEBx         ....D            A.E.D
+xxxxx         .D..E            B.CBE
+xxxxE                          .E...
+        left  front right      ..DC.
+xxxxx   ..BDD .DB.D DDB..
+xExxx   E.A.. A.E.D ..A.D
+xxxxx   .BE.E B.EBE E.BC.
+xxxxx   .E... .E... ...E.
+xxxxx   ..D.. ..DC. ..C..
+        
+xxxxx         bottom
+xxxxx         .D..E 
+xxDCx         ....D 
+xxxxx         A.DC. 
+xxxxx         BEC.. 
+              ..E.D 
